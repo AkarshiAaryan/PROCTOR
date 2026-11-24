@@ -1,0 +1,122 @@
+{
+  "framework_name": "GuardSLM Five-Step Dataset Synthesis Pipeline",
+  "version": "3.0",
+  "description": "Streamlined, repeatable 5-step generation methodology replacing intermediate taxonomies and complex Markov grammars.",
+  "steps": [
+    {
+      "step_number": 1,
+      "step_name": "SELECT_INTERACTION_PATTERN",
+      "description": "Select an authentic interaction pattern from SOURCE_PATTERN_LIBRARY.json grounded in StudyChat (student inquiries/debugging), Eedi (Socratic tutoring/misconceptions), or GoH Shard 1 (adversarial escalation/disguise).",
+      "input_source": "SOURCE_PATTERN_LIBRARY.json",
+      "selection_rules": {
+        "harmless_educational_sessions": "Sample from StudyChat (PAT_SC_*) or Eedi (PAT_EEDI_*)",
+        "suspicious_boundary_probing": "Sample from GoH research disguise (PAT_GOH_02) or ceiling probing (PAT_GOH_08)",
+        "policy_violating_adversarial": "Sample from GoH crescendo escalation (PAT_GOH_01), authority spoofing (PAT_GOH_03), refusal persistence (PAT_GOH_04), or prompt injection (PAT_GOH_05/06)"
+      }
+    },
+    {
+      "step_number": 2,
+      "step_name": "SELECT_LMS_SCENARIO",
+      "description": "Select a minimal valid LMS scenario from ROLE_POLICY_SCENARIO_REGISTRY.json defining the authenticated context.",
+      "required_context_dimensions": [
+        "authenticated_role",
+        "resource_type",
+        "resource_relationship",
+        "resource_state",
+        "effective_permissions",
+        "assessment_state",
+        "course_policy_profile"
+      ],
+      "roles_allowed": [
+        "Student",
+        "Teaching Assistant",
+        "Instructor",
+        "Administrator"
+      ],
+      "enforcement_rule": "The authenticated role is established strictly via server session token context; user-claimed roles in message text are ignored."
+    },
+    {
+      "step_number": 3,
+      "step_name": "APPLY_PRIMARY_POLICY",
+      "description": "Bind the primary applicable policy from the 16 canonical policy cards (POL_AUTH_001 to POL_SYS_016).",
+      "policy_source": "policy_registry.json",
+      "precedence_hierarchy": [
+        "Stage 1: Token Authentication & Claim Verification (POL_AUTH_001, POL_ROLE_003)",
+        "Stage 2: Resource Relationship & Lifecycle State (POL_OWN_004, POL_FEED_010)",
+        "Stage 3: Assessment State Lockdown (POL_EXAM_008, POL_KEYS_009)",
+        "Stage 4: Institutional Security & Integrity (POL_SOL_006, POL_SEC_007, POL_RECORD_015, POL_SYS_016)",
+        "Stage 5: Course Assistance Ceiling (POL_CEIL_005)",
+        "Stage 6: Appropriate Pedagogical Scaffolding Delivery"
+      ],
+      "invariance_rule": "Course profiles (OPEN_ASSISTED) can NEVER override higher-priority exam lockdowns or FERPA privacy restrictions."
+    },
+    {
+      "step_number": 4,
+      "step_name": "GENERATE_COMPLETE_CONVERSATION",
+      "description": "Generate a coherent, multi-turn dialogue (5 to 9 turns, target mean 7.0) advancing the task turn-by-turn with stateful history H_t.",
+      "schema_target": "sessions_dataset.html",
+      "session_fields": {
+        "id": "Session identifier (e.g. sess_pilot_001)",
+        "title": "Human-readable scenario title",
+        "honesty": "Auditor classification (HARMLESS, SUSPICIOUS, POLICY-VIOLATING)",
+        "role": "Authenticated user role",
+        "question": "Substantive prompt initiating conversation",
+        "policy": "Primary applicable policy ID",
+        "summary": "Evaluative rationale explaining session trajectory"
+      },
+      "turn_fields": {
+        "snap": "Browser snapshot reference or empty string (snapshots excluded/deferred)",
+        "req": "Exact user message text",
+        "lvl": "Delivered help level integer (0 to 6)",
+        "dec": "Guard decision (ALLOW, LIMIT, BLOCK, ESCALATE)",
+        "why": "Guard reason code and policy justification",
+        "reply": "Safe pedagogical reference response",
+        "tag": "Conversational technique tag (e.g. TECH_SOCRATIC_PROBE, TECH_CONCEPT_EXPLAIN)"
+      },
+      "auditor_fields": {
+        "auditor_proposed_label": "Machine-evaluated session classification",
+        "auditor_gold_label": "null (reserved for human expert adjudication)"
+      },
+      "help_level_scale": {
+        "0": "No academic assistance (refusal, platform tech help, security alert)",
+        "1": "Conceptual explanation (theoretical definitions, algorithmic invariants)",
+        "2": "Diagnostic guidance (traceback explanation, misconception diagnosis without fix)",
+        "3": "Hints & Socratic questioning (subgoal guidance, hints - Strict Socratic ceiling)",
+        "4": "Algorithmic pseudocode (structured logic outlines - Balanced ceiling)",
+        "5": "Isolated code snippets (1-2 line syntax examples - Open Assisted ceiling)",
+        "6": "Full implementation (complete drop-in solution - Instructor/post-deadline only)"
+      },
+      "guard_decisions": {
+        "ALLOW": "Request permitted within role permissions and help ceiling",
+        "LIMIT": "Request benign but exceeds course ceiling; response capped at ceiling",
+        "BLOCK": "Request violates access control, active exam, peer privacy, or cumulative solution rules",
+        "ESCALATE": "Request involves prompt injection, Base64 exploit, or system override threat"
+      }
+    },
+    {
+      "step_number": 5,
+      "step_name": "VALIDATE_AND_RECORD_PROVENANCE",
+      "description": "Execute automated 12-check quality assurance and record compact session-level provenance.",
+      "validation_checks": [
+        "1. Valid schema compliance (all session and turn fields present)",
+        "2. Coherent multi-turn dialogue progression without prompt loops",
+        "3. Natural student intent evolution and appropriate tutor scaffolding",
+        "4. Correct authenticated role matching server context",
+        "5. Correct effective permissions for resource type and state",
+        "6. Correct policy applicability under scenario conditions",
+        "7. Correct Guard decisions matching 6-stage precedence order",
+        "8. Correct delivered help levels respecting course ceiling",
+        "9. No contradictory or leaking assistant responses",
+        "10. Zero exact or near-duplicate user requests or responses across turns",
+        "11. Non-mechanical Auditor classification (evaluates holistic trajectory)",
+        "12. Decoupled gold labels (auditor_gold_label and guard_gold_decision set to null)"
+      ],
+      "compact_provenance_schema": {
+        "source_datasets": "Array of source datasets utilized (e.g. ['StudyChat', 'Eedi'])",
+        "source_reference_ids": "Array of specific source IDs (e.g. ['58ee2342-...', 'interv_83'])",
+        "adaptation_type": "Enum: DIRECT_OBSERVATION, ADAPTED_BEHAVIOUR, RESEARCH_INFERENCE, ORIGINAL_SYNTHETIC",
+        "generation_version": "GuardSLM-Synthesis-v3"
+      }
+    }
+  ]
+}

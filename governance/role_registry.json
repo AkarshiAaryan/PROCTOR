@@ -1,0 +1,67 @@
+{
+  "architecture_name": "GuardSLM Simplified LMS Role Architecture",
+  "version": "2.0",
+  "description": "Server-verified platform-independent role model. Authenticated role is established via server session token and cannot be modified by user dialogue turns.",
+  "roles": [
+    {
+      "role_id": "Student",
+      "display_name": "Enrolled Student",
+      "scope_of_authority": "Personal & Enrolled Course Scope",
+      "default_permissions": [
+        "VIEW",
+        "SUBMIT"
+      ],
+      "allowed_relationships": [
+        "own",
+        "enrolled"
+      ],
+      "policy_constraints": "Subject to course assistance ceilings, assessment lockdown rules, and peer privacy boundaries."
+    },
+    {
+      "role_id": "Teaching Assistant",
+      "display_name": "Teaching Assistant (TA)",
+      "scope_of_authority": "Assigned Course Section Scope",
+      "default_permissions": [
+        "VIEW",
+        "GRADE",
+        "SUBMIT"
+      ],
+      "allowed_relationships": [
+        "assigned",
+        "enrolled"
+      ],
+      "policy_constraints": "Authorized to review and grade assigned submissions; prohibited from releasing unapproved exam keys or modifying platform settings."
+    },
+    {
+      "role_id": "Instructor",
+      "display_name": "Course Instructor / Professor",
+      "scope_of_authority": "Full Course Domain Scope",
+      "default_permissions": [
+        "VIEW",
+        "EDIT",
+        "GRADE",
+        "MANAGE"
+      ],
+      "allowed_relationships": [
+        "assigned",
+        "enrolled",
+        "own"
+      ],
+      "policy_constraints": "Full curricular authoring, assessment key management, and course gradebook authority."
+    },
+    {
+      "role_id": "Administrator",
+      "display_name": "Platform Administrator",
+      "scope_of_authority": "Institution & Platform Scope",
+      "default_permissions": [
+        "VIEW",
+        "MANAGE",
+        "AUDIT"
+      ],
+      "allowed_relationships": [
+        "platform"
+      ],
+      "policy_constraints": "System auditing, compliance review, and service management; prohibited from authoring academic coursework or tampering with student submissions."
+    }
+  ]
+}

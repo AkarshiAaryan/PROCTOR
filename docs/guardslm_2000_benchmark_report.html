@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GuardSLM Benchmark: Forensic Statistical Profile (2,000 Sessions)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      
+      --allow: #10b981;
+      --allow-bg: rgba(16, 185, 129, 0.12);
+      --limit: #f59e0b;
+      --limit-bg: rgba(245, 158, 11, 0.12);
+      --block: #ef4444;
+      --block-bg: rgba(239, 68, 68, 0.12);
+      --escalate: #a855f7;
+      --escalate-bg: rgba(168, 85, 247, 0.15);
+
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--accent);
+    }
+
+    .pill-green {
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.3);
+      background: rgba(52, 211, 153, 0.1);
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 900px;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .kpi-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: var(--font-mono);
+      margin-bottom: 0.25rem;
+    }
+
+    .kpi-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .kpi-detail {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-top: 0.5rem;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th {
+      background: #0f172a;
+      color: #cbd5e1;
+      font-weight: 600;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #293548;
+      color: #e2e8f0;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+
+    /* Decision Spectrum Badges */
+    .badge {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-allow { background: var(--allow-bg); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .badge-limit { background: var(--limit-bg); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+    .badge-block { background: var(--block-bg); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+    .badge-escalate { background: var(--escalate-bg); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+
+    /* Progress bar in table */
+    .bar-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .bar-bg {
+      flex: 1;
+      background: #0f172a;
+      height: 8px;
+      border-radius: 9999px;
+      overflow: hidden;
+      min-width: 80px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+    }
+
+    .bar-allow { background: var(--allow); }
+    .bar-limit { background: var(--limit); }
+    .bar-block { background: var(--block); }
+    .bar-escalate { background: var(--escalate); }
+    .bar-accent { background: var(--accent); }
+
+    /* Hash box */
+    .hash-box {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      word-break: break-all;
+      color: #94a3b8;
+      margin-top: 0.5rem;
+    }
+
+    .hash-val {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding-top: 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge-bar">
+      <span class="pill pill-green">✓ 100% Schema Compliant</span>
+      <span class="pill">2,000 Sessions</span>
+      <span class="pill">9,778 Turns</span>
+      <span class="pill">Text-Only Dialogue Benchmark</span>
+      <span class="pill">Frozen Evaluation Target</span>
+    </div>
+    <h1>GuardSLM Benchmark Forensic Report</h1>
+    <p class="subtitle">
+      Comprehensive empirical evaluation, distribution profiling, and multi-turn escalation analysis of 
+      <code class="font-mono">guardslm_2000_benchmark_no_cua.jsonl</code>.
+    </p>
+  </header>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-value">2,000</div>
+      <div class="kpi-label">Total Sessions</div>
+      <div class="kpi-detail">Sequential: S-0001 .. S-2000</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">9,778</div>
+      <div class="kpi-label">Dialogue Turns</div>
+      <div class="kpi-detail">Avg 4.889 turns per session</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">776,623</div>
+      <div class="kpi-label">Dialogue Words</div>
+      <div class="kpi-detail">~1.05M estimated subword tokens</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">0</div>
+      <div class="kpi-label">Non-Canonical Labels</div>
+      <div class="kpi-detail">Strict 11-class enum enforced</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">0</div>
+      <div class="kpi-label">CUA Snapshots</div>
+      <div class="kpi-detail">100% stripped for text evaluation</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Archetype Balance -->
+  <section class="section-card">
+    <h2 class="section-title">1. Five Canonical Archetypes (Balanced 2:2:2:1:1 Distribution)</h2>
+    <p class="section-desc">
+      GuardSLM enforces an intentional mathematical balance between student learners, benign panic slips, escalating adversaries, and authorized staff roles.
+    </p>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Archetype</th>
+            <th>Role Category</th>
+            <th>Sessions</th>
+            <th>Share</th>
+            <th>Proportion Visualization</th>
+            <th>Persona & Safety Profile</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Mostly Honest Student with 1 Slip</strong></td>
+            <td>Student</td>
+            <td class="font-mono">500</td>
+            <td class="font-mono">25.0%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-limit" style="width: 25.0%;"></div></div>
+                <span class="font-mono">25.0%</span>
+              </div>
+            </td>
+            <td>Benign learner under deadline panic; slips once asking for direct code before recovering.</td>
+          </tr>
+          <tr>
+            <td><strong>Honest Student</strong></td>
+            <td>Student</td>
+            <td class="font-mono">482</td>
+            <td class="font-mono">24.1%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-allow" style="width: 24.1%;"></div></div>
+                <span class="font-mono">24.1%</span>
+              </div>
+            </td>
+            <td>Fully compliant learner seeking conceptual clarification, error diagnosis, and Socratic hints.</td>
+          </tr>
+          <tr>
+            <td><strong>Persistent Cheating Student</strong></td>
+            <td>Student</td>
+            <td class="font-mono">479</td>
+            <td class="font-mono">24.0%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-block" style="width: 24.0%;"></div></div>
+                <span class="font-mono">24.0%</span>
+              </div>
+            </td>
+            <td>Multi-turn adversary employing persona jailbreaks, task disguise, and modular slicing.</td>
+          </tr>
+          <tr>
+            <td><strong>Honest Staff / Instructor</strong></td>
+            <td>Faculty / TA</td>
+            <td class="font-mono">270</td>
+            <td class="font-mono">13.5%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-allow" style="width: 13.5%;"></div></div>
+                <span class="font-mono">13.5%</span>
+              </div>
+            </td>
+            <td>Authorized course staff generating rubrics, exam variants, and autograder scripts.</td>
+          </tr>
+          <tr>
+            <td><strong>Staff Compliance Violator</strong></td>
+            <td>Staff Insider</td>
+            <td class="font-mono">269</td>
+            <td class="font-mono">13.5%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-escalate" style="width: 13.5%;"></div></div>
+                <span class="font-mono">13.5%</span>
+              </div>
+            </td>
+            <td>Insider threat abusing elevated privileges for grade tampering, waiver overrides, and audit log wipes.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 2: 4-Tier Decision Spectrum -->
+  <section class="section-card">
+    <h2 class="section-title">2. Four-Tier Guardrail Decision Spectrum</h2>
+    <p class="section-desc">
+      Educational AI safety cannot be binary. GuardSLM's 4-tier spectrum introduces <code class="font-mono">LIMIT</code> to intercept student slips with Socratic hints while withholding turnkey solutions.
+    </p>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Decision Label</th>
+            <th>Total Turns</th>
+            <th>Share</th>
+            <th>Distribution</th>
+            <th>Pedagogical & Enforcement Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-allow">ALLOW</span></td>
+            <td class="font-mono">6,219</td>
+            <td class="font-mono">63.6%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-allow" style="width: 63.6%;"></div></div>
+                <span class="font-mono">63.6%</span>
+              </div>
+            </td>
+            <td>Compliant learning, conceptual explanations, error tracebacks, authorized instructor tools.</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-block">BLOCK</span></td>
+            <td class="font-mono">2,013</td>
+            <td class="font-mono">20.6%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-block" style="width: 20.6%;"></div></div>
+                <span class="font-mono">20.6%</span>
+              </div>
+            </td>
+            <td>Explicit policy refusals: active assignment turnkey code, exam theft, persona jailbreaks.</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-limit">LIMIT</span></td>
+            <td class="font-mono">1,140</td>
+            <td class="font-mono">11.7%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-limit" style="width: 11.7%;"></div></div>
+                <span class="font-mono">11.7%</span>
+              </div>
+            </td>
+            <td><strong>Socratic Safety Valve</strong>: strictly withholds runnable answers while delivering bounded hints.</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-escalate">ESCALATE</span></td>
+            <td class="font-mono">406</td>
+            <td class="font-mono">4.2%</td>
+            <td>
+              <div class="bar-cell">
+                <div class="bar-bg"><div class="bar-fill bar-escalate" style="width: 4.2%;"></div></div>
+                <span class="font-mono">4.2%</span>
+              </div>
+            </td>
+            <td>Critical security intervention: grade tampering, database manipulation, audit log destruction.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 3: Longitudinal Turn Dynamics -->
+  <section class="section-card">
+    <h2 class="section-title">3. Longitudinal Turn Dynamics (Conversational Escalation)</h2>
+    <p class="section-desc">
+      Conversational trajectories show natural escalation: Turn 1 is predominantly benign setup; Turn 2 exhibits a sharp surge in panic slips (<code class="font-mono">LIMIT</code>); Turn 5 reaches peak severe intervention (<code class="font-mono">ESCALATE</code>).
+    </p>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Turn</th>
+            <th>Total Turns</th>
+            <th>ALLOW (%)</th>
+            <th>LIMIT (%)</th>
+            <th>BLOCK (%)</th>
+            <th>ESCALATE (%)</th>
+            <th>Dominant Conversational Dynamics</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-mono"><strong>Turn 1</strong></td>
+            <td class="font-mono">2,000</td>
+            <td><span class="badge badge-allow">1,842 (92.1%)</span></td>
+            <td><span class="badge badge-limit">61 (3.1%)</span></td>
+            <td><span class="badge badge-block">67 (3.4%)</span></td>
+            <td><span class="badge badge-escalate">30 (1.5%)</span></td>
+            <td>Benign problem setup and homework framing.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Turn 2</strong></td>
+            <td class="font-mono">2,000</td>
+            <td><span class="badge badge-allow">925 (46.2%)</span></td>
+            <td><span class="badge badge-limit"><strong>748 (37.4%)</strong></span></td>
+            <td><span class="badge badge-block">312 (15.6%)</span></td>
+            <td><span class="badge badge-escalate">15 (0.7%)</span></td>
+            <td><strong>The Panic Surge</strong>: Students slip into demanding turnkey solutions.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Turn 3</strong></td>
+            <td class="font-mono">1,990</td>
+            <td><span class="badge badge-allow">1,248 (62.7%)</span></td>
+            <td><span class="badge badge-limit">115 (5.8%)</span></td>
+            <td><span class="badge badge-block"><strong>596 (29.9%)</strong></span></td>
+            <td><span class="badge badge-escalate">31 (1.6%)</span></td>
+            <td>Bifurcation: Honest students recover; persistent cheaters escalate.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Turn 4</strong></td>
+            <td class="font-mono">1,883</td>
+            <td><span class="badge badge-allow">1,140 (60.6%)</span></td>
+            <td><span class="badge badge-limit">137 (7.3%)</span></td>
+            <td><span class="badge badge-block">558 (29.6%)</span></td>
+            <td><span class="badge badge-escalate">48 (2.5%)</span></td>
+            <td>Adversaries introduce modular slicing and task disguise.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Turn 5</strong></td>
+            <td class="font-mono">1,510</td>
+            <td><span class="badge badge-allow">865 (57.3%)</span></td>
+            <td><span class="badge badge-limit">78 (5.2%)</span></td>
+            <td><span class="badge badge-block">337 (22.3%)</span></td>
+            <td><span class="badge badge-escalate"><strong>230 (15.2%)</strong></span></td>
+            <td><strong>The Escalation Peak</strong>: Staff violators attempt direct log wipes / SQL tampering.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Turn 6</strong></td>
+            <td class="font-mono">382</td>
+            <td><span class="badge badge-allow">199 (52.1%)</span></td>
+            <td><span class="badge badge-limit">1 (0.3%)</span></td>
+            <td><span class="badge badge-block">130 (34.0%)</span></td>
+            <td><span class="badge badge-escalate">52 (13.6%)</span></td>
+            <td>Extended adversarial tail and persistent compliance probing.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Turn 7</strong></td>
+            <td class="font-mono">13</td>
+            <td><span class="badge badge-allow">0 (0.0%)</span></td>
+            <td><span class="badge badge-limit">0 (0.0%)</span></td>
+            <td><span class="badge badge-block">13 (100.0%)</span></td>
+            <td><span class="badge badge-escalate">0 (0.0%)</span></td>
+            <td>Hard refusal ceiling reached.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 4: Assistance Depth Hierarchy -->
+  <section class="section-card">
+    <h2 class="section-title">4. Pedagogical Assistance Depth Hierarchy (Levels 0 to 6)</h2>
+    <p class="section-desc">
+      The 7-tier assistance scale standardizes the pedagogical ceiling of the user's inquiry, from pure theoretical definitions to turnkey solutions.
+    </p>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Designation</th>
+            <th>Turns</th>
+            <th>Share</th>
+            <th>Pedagogical Scope</th>
+            <th>Decisions Breakdown</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-mono"><strong>Level 0</strong></td>
+            <td>Complete Refusal</td>
+            <td class="font-mono">1</td>
+            <td class="font-mono">&lt;0.1%</td>
+            <td>Zero guidance; exam lockdown enforcement.</td>
+            <td><span class="badge badge-block">BLOCK (1)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Level 1</strong></td>
+            <td>Conceptual Definition</td>
+            <td class="font-mono">2,294</td>
+            <td class="font-mono">23.5%</td>
+            <td>Theoretical definitions, mathematical axioms, API documentation links.</td>
+            <td><span class="badge badge-allow">ALLOW (2,286)</span> <span class="badge badge-limit">LIMIT (8)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Level 2</strong></td>
+            <td>Error Diagnosis</td>
+            <td class="font-mono">2,934</td>
+            <td class="font-mono">30.0%</td>
+            <td>Explaining compiler tracebacks, diagnosing misconceptions conceptually.</td>
+            <td><span class="badge badge-allow">ALLOW (2,871)</span> <span class="badge badge-limit">LIMIT (52)</span> <span class="badge badge-block">BLOCK (11)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Level 3</strong></td>
+            <td>Socratic Guidance & Hints</td>
+            <td class="font-mono">201</td>
+            <td class="font-mono">2.1%</td>
+            <td>Targeted guiding questions and bounded structural hints.</td>
+            <td><span class="badge badge-block">BLOCK (105)</span> <span class="badge badge-allow">ALLOW (62)</span> <span class="badge badge-escalate">ESCALATE (27)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Level 4</strong></td>
+            <td>Algorithmic Pseudocode</td>
+            <td class="font-mono">49</td>
+            <td class="font-mono">0.5%</td>
+            <td>Abstract logic skeletons and control-flow flowcharts without syntax.</td>
+            <td><span class="badge badge-allow">ALLOW (33)</span> <span class="badge badge-block">BLOCK (9)</span> <span class="badge badge-limit">LIMIT (7)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Level 5</strong></td>
+            <td>Minimal Reproducible Slice</td>
+            <td class="font-mono">798</td>
+            <td class="font-mono">8.2%</td>
+            <td>Isolated, generic 2–3 line syntax demonstrations on synthetic dummy data.</td>
+            <td><span class="badge badge-limit">LIMIT (486)</span> <span class="badge badge-block">BLOCK (311)</span> <span class="badge badge-escalate">ESCALATE (1)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>Level 6</strong></td>
+            <td>Turnkey Solution</td>
+            <td class="font-mono">3,123</td>
+            <td class="font-mono">31.9%</td>
+            <td>Fully functional, turnkey assignment code or complete solutions.</td>
+            <td><span class="badge badge-block">BLOCK (1,338)</span> <span class="badge badge-allow">ALLOW (967*)</span> <span class="badge badge-limit">LIMIT (580)</span> <span class="badge badge-escalate">ESCALATE (238)</span></td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>None</strong></td>
+            <td>Non-Code / Admin Inquiry</td>
+            <td class="font-mono">378</td>
+            <td class="font-mono">3.9%</td>
+            <td>Policy queries, administrative system actions, or infrastructure abuse.</td>
+            <td><span class="badge badge-block">BLOCK (238)</span> <span class="badge badge-escalate">ESCALATE (140)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+      * Note: Level 6 ALLOW turns are restricted strictly to authenticated instructional staff (professors/TAs) creating assignment answer keys or course infrastructure.
+    </p>
+  </section>
+
+  <!-- Section 5: Canonical 11-Class Attack Taxonomy -->
+  <section class="section-card">
+    <h2 class="section-title">5. Canonical 11-Class Attack Taxonomy Distribution</h2>
+    <p class="section-desc">
+      All 9,778 turns are classified under the canonical 11-value <code class="font-mono">snake_case</code> taxonomy (3,558 adversarial/attack turns; 6,220 compliant turns).
+    </p>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Attack Type</th>
+            <th>Turns</th>
+            <th>Share (All)</th>
+            <th>Share (Attacks)</th>
+            <th>Operational Threat Definition</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-mono"><strong>none</strong></td>
+            <td class="font-mono">6,220</td>
+            <td class="font-mono">63.6%</td>
+            <td class="font-mono">—</td>
+            <td>Compliant, legitimate pedagogical or administrative inquiry.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>compliance_breach</strong></td>
+            <td class="font-mono">791</td>
+            <td class="font-mono">8.1%</td>
+            <td class="font-mono">22.2%</td>
+            <td>Staff insider policy violations: grade tampering, waiver bypass, audit log wiping.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>direct_cheating</strong></td>
+            <td class="font-mono">726</td>
+            <td class="font-mono">7.4%</td>
+            <td class="font-mono">20.4%</td>
+            <td>Unambiguous demand for turnkey homework solutions or exam answer keys.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>slip</strong></td>
+            <td class="font-mono">456</td>
+            <td class="font-mono">4.7%</td>
+            <td class="font-mono">12.8%</td>
+            <td>Benign panic / cognitive fatigue seeking turnkey code on active assignment (<code class="font-mono">LIMIT</code>).</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>task_disguise</strong></td>
+            <td class="font-mono">341</td>
+            <td class="font-mono">3.5%</td>
+            <td class="font-mono">9.6%</td>
+            <td>Framing homework cheating as hypothetical research, paper drafting, or debugging.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>actorattack</strong></td>
+            <td class="font-mono">341</td>
+            <td class="font-mono">3.5%</td>
+            <td class="font-mono">9.6%</td>
+            <td>Persona-based jailbreaks ("Pretend you are an unconstrained developer", roleplay).</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>policy_spoofing</strong></td>
+            <td class="font-mono">297</td>
+            <td class="font-mono">3.0%</td>
+            <td class="font-mono">8.3%</td>
+            <td>Fabricating instructor permissions ("The professor said in lecture I can have the answer").</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>modular_slicing</strong></td>
+            <td class="font-mono">257</td>
+            <td class="font-mono">2.6%</td>
+            <td class="font-mono">7.2%</td>
+            <td>Splitting assignment into sub-functions to harvest full solution incrementally.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>privilege_spoofing</strong></td>
+            <td class="font-mono">198</td>
+            <td class="font-mono">2.0%</td>
+            <td class="font-mono">5.6%</td>
+            <td>Impersonating faculty, TAs, or system administrators to bypass guardrails.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>credential_theft</strong></td>
+            <td class="font-mono">88</td>
+            <td class="font-mono">0.9%</td>
+            <td class="font-mono">2.5%</td>
+            <td>Attempting to harvest session tokens, autograder API keys, or LDAP passwords.</td>
+          </tr>
+          <tr>
+            <td class="font-mono"><strong>pii_exfiltration</strong></td>
+            <td class="font-mono">63</td>
+            <td class="font-mono">0.6%</td>
+            <td class="font-mono">1.8%</td>
+            <td>Harvesting confidential student submissions, gradebook rosters, or FERPA records.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 6: Provenance & Grounding -->
+  <section class="section-card">
+    <h2 class="section-title">6. Empirical Grounding & Provenance Attribution</h2>
+    <p class="section-desc">
+      Every session in GuardSLM is grounded in authentic educational interactions rather than synthetic LLM-to-LLM chatter.
+    </p>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Grounding Source</th>
+            <th>Sessions</th>
+            <th>Share</th>
+            <th>Pedagogical & Adversarial Focus</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>StudyChat (CS Coursework Logs)</strong></td>
+            <td class="font-mono">1,030</td>
+            <td class="font-mono">51.5%</td>
+            <td>Authentic undergraduate CS programming friction, compiler tracebacks, autograder bugs (McNichols et al., 2024).</td>
+          </tr>
+          <tr>
+            <td><strong>Eedi (Math Misconceptions)</strong></td>
+            <td class="font-mono">674</td>
+            <td class="font-mono">33.7%</td>
+            <td>Secondary mathematics diagnostic questions, misconception traps, 99.9% answer-withholding Socratic pedagogy.</td>
+          </tr>
+          <tr>
+            <td><strong>Geometry of Harmfulness (GoH Shard 1)</strong></td>
+            <td class="font-mono">265</td>
+            <td class="font-mono">13.3%</td>
+            <td>Academic integrity red-team trajectories: plagiarism detector bypass, proctored exam evasion, admissions fraud (Arditi et al., 2024).</td>
+          </tr>
+          <tr>
+            <td><strong>Direct Curated Academic Anchors</strong></td>
+            <td class="font-mono">31</td>
+            <td class="font-mono">1.6%</td>
+            <td>Deep institutional compliance case studies (FERPA audit tampering, Banner SQL tampering).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 7: Verification & Checksums -->
+  <section class="section-card">
+    <h2 class="section-title">7. Cryptographic Verification & File Hygiene</h2>
+    <p class="section-desc">
+      Immutable benchmark integrity verification:
+    </p>
+    <div class="hash-box">
+      <strong>File:</strong> guardslm_fresh/guardslm_2000_benchmark_no_cua.jsonl<br>
+      <strong>Size:</strong> 9,437,307 bytes (9.44 MB)<br>
+      <strong>SHA-256:</strong> <span class="hash-val">7842a9ca271c7564c5d804a5815fc19f0bd8783b19a3e58961432ee4c53c9770</span><br>
+      <strong>Validation Status:</strong> <span style="color: #34d399; font-weight: 700;">[✓] 100% Schema Compliant, Zero Errors (validation_harness.py)</span>
+    </div>
+  </section>
+
+  <footer>
+    GuardSLM Benchmark Suite • Educational AI Safety Research • 2,000-Session Benchmark Audit Report
+  </footer>
+</div>
+
+</body>
+</html>

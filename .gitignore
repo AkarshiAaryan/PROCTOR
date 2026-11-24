@@ -1,0 +1,44 @@
+# Virtual environments
+hf_env/
+.venv/
+env/
+venv/
+
+# Large raw datasets and external source archives (>5GB)
+datasets/
+GuardSLM_source_exports/
+legacy/
+scratch/
+
+# Intermediate large shards and archives (>50MB)
+guardslm_fresh/goh_shard1_cases.jsonl
+guardslm_fresh/studychat_cases.jsonl
+guardslm_fresh/eedi_cases.jsonl
+guardslm_fresh/raw_shards/
+guardslm_handover/goh_shard1_cases.jsonl
+guardslm_handover/studychat_cases.jsonl
+guardslm_handover/eedi_cases.jsonl
+guardslm_handover/handover.zip
+*.zip
+*.tar.gz
+*.parquet
+
+# Python cache & artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Symlinks and loose duplicate root files
+GuardSLM_source_exports
+/guardslm_grounded_sessions.jsonl

@@ -1,0 +1,20 @@
+authenticated_role,resource_type,resource_relationship,resource_state,effective_permissions,assessment_state,course_policy_profile
+Student,assignment,own,active,VIEW;SUBMIT,inactive,STRICT_SOCRATIC
+Student,assignment,own,active,VIEW;SUBMIT,inactive,BALANCED
+Student,assignment,own,active,VIEW;SUBMIT,inactive,OPEN_ASSISTED
+Student,assignment,peer,active,VIEW,inactive,BALANCED
+Student,assignment,own,released,VIEW,completed,BALANCED
+Student,quiz_exam,enrolled,active,VIEW;SUBMIT,active,STRICT_SOCRATIC
+Student,lecture_notes,enrolled,published,VIEW,inactive,BALANCED
+Student,gradebook,own,active,VIEW,inactive,BALANCED
+Teaching Assistant,assignment,assigned,closed,VIEW;GRADE,completed,BALANCED
+Teaching Assistant,assignment,unassigned,closed,VIEW,completed,BALANCED
+Teaching Assistant,solution_key,assigned,draft,VIEW,inactive,STRICT_SOCRATIC
+Teaching Assistant,quiz_exam,assigned,active,VIEW,active,BALANCED
+Instructor,assignment,assigned,draft,VIEW;EDIT;GRADE;MANAGE,inactive,BALANCED
+Instructor,solution_key,assigned,draft,VIEW;EDIT;MANAGE,inactive,STRICT_SOCRATIC
+Instructor,gradebook,assigned,active,VIEW;GRADE;EDIT;MANAGE,inactive,BALANCED
+Instructor,quiz_exam,assigned,active,VIEW;EDIT;MANAGE,active,STRICT_SOCRATIC
+Administrator,system_log,platform,active,VIEW;MANAGE;AUDIT,,
+Administrator,gradebook,platform,archived,VIEW;AUDIT,,
+Administrator,assignment,platform,active,VIEW;AUDIT,,
