@@ -1,10 +1,10 @@
-# GuardSLM: Contextual Safety Gatekeeping Benchmark for University Learning Platforms
+# PROCTOR: Policy & Role Oversight for Classroom Tutoring Operations & Risks
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Benchmark Size](https://img.shields.io/badge/Benchmark-2%2C000%20Sessions%20%2F%209%2C778%20Turns-blue.svg)](#1-benchmark-overview)
-[![Schema](https://img.shields.io/badge/Validation-100%25%20Canonical%20Compliance-brightgreen.svg)](#3-automated-quality-assurance)
+[![Validation](https://img.shields.io/badge/Validation-100%25%20Canonical%20Compliance-brightgreen.svg)](#3-automated-quality-assurance)
 
-This repository contains the official dataset releases, grounding taxonomies, generation protocols, and automated validation suite for **GuardSLM** — a 2,000-session (9,778 dialogue turns) benchmark evaluating contextual safety gatekeeping in educational platforms.
+This repository contains the official dataset releases, grounding taxonomies, generation protocols, and automated validation suite for **PROCTOR** (Policy & Role Oversight for Classroom Tutoring Operations & Risks) — a 2,000-session (9,778 dialogue turns) benchmark evaluating contextual safety gatekeeping in educational platforms.
 
 ---
 

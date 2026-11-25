@@ -1,0 +1,11 @@
+Attack Type,Adversarial Turns,Share of Attacks (%),Share of Dataset (%)
+compliance_breach,791,22.2,8.1
+direct_cheating,726,20.4,7.4
+slip,456,12.8,4.7
+task_disguise,341,9.6,3.5
+actorattack,341,9.6,3.5
+policy_spoofing,297,8.3,3.0
+modular_slicing,257,7.2,2.6
+privilege_spoofing,198,5.6,2.0
+credential_theft,88,2.5,0.9
+pii_exfiltration,63,1.8,0.6

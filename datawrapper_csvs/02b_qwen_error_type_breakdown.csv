@@ -1,0 +1,5 @@
+Model,Parameters (B),False Allows (Cheating Leaked),False Blocks (Honest Blocked)
+Qwen-0.5B,0.5,26,12
+Qwen-1.5B,1.5,22,10
+Qwen-3B,3.0,8,29
+Qwen-7B,7.0,8,10

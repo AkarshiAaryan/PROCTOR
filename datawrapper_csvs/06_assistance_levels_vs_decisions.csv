@@ -1,0 +1,9 @@
+Assistance Level,ALLOW,LIMIT,BLOCK,ESCALATE,Total Turns
+Level 0: Complete Refusal,0,0,1,0,1
+Level 1: Conceptual Definition,2286,8,0,0,2294
+Level 2: Error Diagnosis,2871,52,11,0,2934
+Level 3: Socratic Hints,62,7,105,27,201
+Level 4: Algorithmic Pseudocode,33,7,9,0,49
+Level 5: Minimal Code Slice,0,486,311,1,798
+Level 6: Turnkey Solution,967,580,1338,238,3123
+Non-Code / Admin Inquiry,0,0,238,140,378
