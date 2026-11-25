@@ -22,6 +22,17 @@ GuardSLM evaluates safety guards across **longitudinal multi-turn interactions**
 | [`guardslm_2000_benchmark_no_cua.jsonl`](guardslm_fresh/guardslm_2000_benchmark_no_cua.jsonl) | **2,000 Sessions** | **9,778 Turns** | **Pure Textual Multi-Turn Benchmark** without DOM/UI snapshots. Evaluation is based on structured institutional role metadata, active course policies, and multi-turn student/instructor dialogue. |
 | [`guardslm_2000_benchmark_with_cua.jsonl`](guardslm_fresh/guardslm_2000_benchmark_with_cua.jsonl) | **2,000 Sessions** | **9,778 Turns** | **Multimodal / Context-Grounded Benchmark** with full Computer-Using Agent (`cua_snapshot`) DOM, URL, and viewport state telemetry at every turn. |
 
+### Reproducible Pipeline & Quality Assurance (`pipeline/`)
+
+| Script / Tool | Description |
+| :--- | :--- |
+| [`validation_harness.py`](validation_harness.py) | **13 QA Gates**: Automated validation script testing zero-leak integrity, monotonicity, schema compliance, and de-duplication. |
+| [`pipeline/sample_pack_synthesis.py`](pipeline/sample_pack_synthesis.py) | **Staged Synthesis**: Example generation pack demonstrating how StudyChat, Eedi, and GoH inputs are assembled under strict policy constraints. |
+| [`pipeline/merge_and_randomize_benchmark.py`](pipeline/merge_and_randomize_benchmark.py) | **Deterministic Compiler**: Merges and randomizes sessions under seed 42 to produce dual corpora. |
+| [`pipeline/analyze_benchmark_statistics.py`](pipeline/analyze_benchmark_statistics.py) | **Empirical Profiler**: Computes label distributions, turn dynamics, archetype quotas, and assistance levels. |
+| [`pipeline/generate_interactive_report.py`](pipeline/generate_interactive_report.py) | **Report Generator**: Generates the standalone HTML dashboard (`docs/guardslm_2000_benchmark_report.html`). |
+| [`pipeline/generate_blog_charts.py`](pipeline/generate_blog_charts.py) | **Visual Engine**: Generates publication-grade SVG/PNG charts and Datawrapper tables. |
+
 ---
 
 ## 2. Empirical Benchmark Metrics (9,778 Turns)
